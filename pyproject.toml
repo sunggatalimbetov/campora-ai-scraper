@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vectir-ai-scrapper"
+version = "0.1.0"
+description = "Telegram message scraper and data pipeline for Vectir AI"
+dependencies = [
+    "python-dotenv",
+    "openai",
+    "supabase",
+    "telethon",
+]
+
+[project.optional-dependencies]
+dev = ["black", "flake8", "isort", "pre-commit"]
+
+[tool.black]
+line-length = 200
+
+[tool.isort]
+profile = "black"
