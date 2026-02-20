@@ -1,10 +1,11 @@
 from typing import List, Optional, Set
 
 from telethon import TelegramClient
+from telethon.sessions import StringSession
 
-from src.config.settings import APP_API_HASH, APP_API_ID
+from src.config.settings import APP_API_HASH, APP_API_ID, TELEGRAM_SESSION
 
-client = TelegramClient("session", APP_API_ID, APP_API_HASH)
+client = TelegramClient(StringSession(TELEGRAM_SESSION), APP_API_ID, APP_API_HASH)
 
 
 async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: Optional[int] = None, limit: int = None) -> List[dict]:

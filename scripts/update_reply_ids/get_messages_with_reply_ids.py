@@ -1,11 +1,12 @@
 from typing import Any, Dict, List
 
 from telethon import TelegramClient
+from telethon.sessions import StringSession
 from telethon.tl.types import Message
 
-from src.config.settings import APP_API_HASH, APP_API_ID, CHAT_USERNAME
+from src.config.settings import APP_API_HASH, APP_API_ID, CHAT_USERNAME, TELEGRAM_SESSION
 
-client = TelegramClient("update_session", APP_API_ID, APP_API_HASH)
+client = TelegramClient(StringSession(TELEGRAM_SESSION), APP_API_ID, APP_API_HASH)
 
 
 async def get_messages_with_reply_ids() -> List[Dict[str, Any]]:

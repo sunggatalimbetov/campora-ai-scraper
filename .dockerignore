@@ -1,0 +1,11 @@
+.env
+*.session
+__pycache__/
+*.pyc
+.git/
+.flake8
+.pre-commit-config.yaml
+supabase/
+tests/
+docs/
+*.egg-info/
