@@ -18,7 +18,8 @@ Consider the FULL conversation thread when judging value — a short reply like 
 KEEP these messages (valuable):
 - Announcements, deadlines, important dates
 - Questions and answers about academic topics
-- Admissions info: entry requirements, exam scores, application deadlines
+- Admissions info: entry requirements, exam scores, application deadlines (e.g. NUET, ENT, SAT)
+- Questions and answers about preparatory and admission programs (e.g. Foundation, Direct admission, Erasmus)
 - Shared resources, links, study materials, exams
 - Official information from professors/admins
 - Questions and answers about documents (e.g. visa, residence permit, student ID)
