@@ -61,6 +61,7 @@ async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: O
                         "text": msg.text,
                         "link": f"{link_base}/{msg.id}",
                         "reply_to_message_id": msg.reply_to_msg_id,
+                        "created_at": msg.date.isoformat() if msg.date else None,
                     }
                 )
                 filtered_count += 1

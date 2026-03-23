@@ -55,6 +55,7 @@ async def run(chat_ids: List[int], flush_threshold: int = 1000, flush_interval: 
                     "text": msg.text,
                     "link": f"https://t.me/c/{raw_id}/{msg.id}",
                     "reply_to_message_id": msg.reply_to_msg_id,
+                    "created_at": msg.date.isoformat() if msg.date else None,
                 },
             )
 
