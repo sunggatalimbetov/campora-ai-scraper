@@ -1,0 +1,32 @@
+[
+  {
+    "chat_id": -1001557871268,
+    "name": "UNIME Group 1",
+    "university": "University of Messina",
+    "description": "Student group"
+  },
+  {
+    "chat_id": -1002852524410,
+    "name": "UNIME Group 2",
+    "university": "University of Messina",
+    "description": "Student group"
+  },
+  {
+    "chat_id": -1002842855377,
+    "name": "UNIME Group 3",
+    "university": "University of Messina",
+    "description": "Student group"
+  },
+  {
+    "chat_id": -1001854607533,
+    "name": "UNIME Group 4",
+    "university": "University of Messina",
+    "description": "Student group"
+  },
+  {
+    "chat_id": -1002188551081,
+    "name": "UNIME Group 5",
+    "university": "University of Messina",
+    "description": "Student group"
+  }
+]
