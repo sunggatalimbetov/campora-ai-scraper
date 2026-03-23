@@ -5,7 +5,15 @@ from telethon.sessions import StringSession
 
 from src.config.settings import APP_API_HASH, APP_API_ID, TELEGRAM_SESSION
 
-client = TelegramClient(StringSession(TELEGRAM_SESSION), APP_API_ID, APP_API_HASH)
+_client = None
+
+
+def get_client() -> TelegramClient:
+    """Lazily create the Telethon client inside the running event loop."""
+    global _client
+    if _client is None:
+        _client = TelegramClient(StringSession(TELEGRAM_SESSION), APP_API_ID, APP_API_HASH)
+    return _client
 
 
 async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: Optional[int] = None, limit: int = None) -> List[dict]:
@@ -41,7 +49,7 @@ async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: O
     link_base = f"https://t.me/c/{raw_id}"
 
     try:
-        async for msg in client.iter_messages(chat_id, **kwargs):
+        async for msg in get_client().iter_messages(chat_id, **kwargs):
             total_count += 1
 
             # Skip if message already exists in database

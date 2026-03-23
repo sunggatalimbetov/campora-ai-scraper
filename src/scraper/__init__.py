@@ -1,7 +1,7 @@
 from src.scraper.build_reply_chains import build_reply_chains  # noqa: F401
 from src.scraper.chat_state import get_chat_state, upsert_chat_state  # noqa: F401
 from src.scraper.fetch_channel_messages import (  # noqa: F401
-    client,
+    get_client,
     fetch_channel_messages,
 )
 from src.scraper.filter_messages_by_importance import (  # noqa: F401
