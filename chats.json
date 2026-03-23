@@ -1,0 +1,38 @@
+[
+  {
+    "chat_id": -1001557871268,
+    "name": "СНГ Messina students",
+    "university": "University of Messina",
+    "description": "Main CIS student group for University of Messina. Topics: documents, VNZh, enrollment, social events, money exchange. Language: Russian."
+  },
+  {
+    "chat_id": -1002852524410,
+    "name": "Айти I",
+    "university": "University of Messina",
+    "description": "IT/Computer Science students at UniMe. Topics: courses, machine learning, intelligent systems, exams. Language: Russian."
+  },
+  {
+    "chat_id": -1002842855377,
+    "name": "Messina 25/26",
+    "university": "University of Messina",
+    "description": "Incoming students 2025/2026. Topics: documents, VNZh (residence permit), enrollment, housing. Language: Russian."
+  },
+  {
+    "chat_id": -1001854607533,
+    "name": "Messina Info",
+    "university": "University of Messina",
+    "description": "Official info channel for CIS students at UniMe. Announcements about mensa, concerts, services, deadlines. Language: Russian/Italian."
+  },
+  {
+    "chat_id": -1002188551081,
+    "name": "GYM бро и бронессы",
+    "university": "University of Messina",
+    "description": "Gym and fitness group for Messina students. Not academic — fitness, sports, meetups. Language: Russian."
+  },
+  {
+    "chat_id": -1002008115936,
+    "name": "NU Applicants",
+    "university": "Nazarbayev University",
+    "description": "Applicants chat (~4,889 members). Topics: admissions, NUET scores, Foundation/Direct, SAT/ENT prep, majors, scholarships. Languages: Russian, Kazakh, English."
+  }
+]

@@ -10,16 +10,20 @@ from src.config.settings import OPENAI_API_KEY
 
 FILTER_PROMPT = """Analyze these Telegram messages from a university student group and identify which ones contain valuable information for students.
 
+The group may focus on any topic — applicants, enrolled students, alumni, etc. Adapt your judgment to the group's actual content.
+
 Some messages are replies to other messages. When a message has "reply_context", it shows the parent message(s) it is responding to.
 Consider the FULL conversation thread when judging value — a short reply like "March 2nd" is valuable if it answers an important question.
 
 KEEP these messages (valuable):
 - Announcements, deadlines, important dates
 - Questions and answers about academic topics
+- Admissions info: entry requirements, exam scores, application deadlines (e.g. NUET, ENT, SAT)
+- Questions and answers about preparatory and admission programs (e.g. Foundation, Direct admission, Erasmus)
 - Shared resources, links, study materials, exams
 - Official information from professors/admins
-- Questions and answers about documents (Visa, Residence Permit, etc.)
-- Questions and answers about Erasmus and student transfer programs
+- Questions and answers about documents (e.g. visa, residence permit, student ID)
+- Questions and answers about exchange and transfer programs (e.g. Erasmus, semester abroad)
 - Course registration and enrollment help
 - Campus facilities and services info
 - Scholarship and financial aid information
