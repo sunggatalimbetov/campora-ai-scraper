@@ -28,5 +28,11 @@
     "name": "UNIME Group 5",
     "university": "University of Messina",
     "description": "Student group"
+  },
+  {
+    "chat_id": -1002008115936,
+    "name": "NU Applicants",
+    "university": "Nazarbayev University",
+    "description": "Applicants chat (~4,889 members). Topics: admissions, NUET scores, Foundation/Direct, SAT/ENT prep, majors, scholarships. Languages: Russian, Kazakh, English."
   }
 ]
