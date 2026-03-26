@@ -1,5 +1,8 @@
 # CLAUDE.md — Vectir AI Scrapper
 
+## Project Context
+Read `~/Documents/Obsidian Vault/vectir-ai/` for goals, evaluation plan, roadmap, backlog, and architecture docs before making decisions.
+
 ## What is this?
 Telegram message scraper that connects to university group chats as a userbot (Telethon), filters messages for importance using GPT-4o-mini, generates embeddings, and stores everything in Supabase for search. Part of the Vectir AI system (3 repos: helper, scrapper, dashboard).
 
