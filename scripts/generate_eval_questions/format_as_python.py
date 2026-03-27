@@ -4,7 +4,7 @@ import json
 def format_as_python(questions: list[dict], start_id: int = 11) -> str:
     """Format questions as Python source code matching test_questions.py format."""
     lines = [
-        '"""Evaluation test questions for Vectir AI bot (Russian, Univesity of Messina context.)"""',
+        '"""Evaluation test questions for Campora AI bot (Russian, Univesity of Messina context.)"""',
         "",
         "EVALUATION_QUESTIONS = [",
     ]

@@ -39,28 +39,24 @@ If a previous run was interrupted, it resumes from `chat_state.last_message_id` 
 
 ### Pipeline steps
 
-1. **`get_existing_message_ids(chat_id)`** — Queries all message IDs already in the `messages` table for this chat (batched reads of 1000). Returns a `Set[int]` used for dedup.
-
-2. **`fetch_channel_messages(chat_id, existing_ids, max_id, limit)`** — Iterates through the chat history using `client.iter_messages()`. Skips messages whose ID is in `existing_ids`. Only keeps messages that have non-empty text. Returns a list of message dicts:
-   ```
-   {"id", "chat_id", "author", "text", "link", "reply_to_message_id"}
-   ```
-   The `link` is built as `https://t.me/c/{raw_id}/{msg.id}` where `raw_id` is the chat ID without the `-100` prefix.
-
-3. **`filter_messages_by_importance(messages, batch_size=20)`** — AI-based filtering using GPT-4o-mini:
-   - Builds reply chains first (`build_reply_chains`) — walks up `reply_to_message_id` recursively (max 5 levels), checks the current batch then falls back to DB lookups.
-   - Sends batches of 20 messages to GPT-4o-mini with a prompt that classifies each message as valuable or not. Reply context (parent chain text) is included so short replies that answer important questions are preserved.
-   - Parses the response (JSON array of kept IDs), then expands the kept set to include full reply chains (ancestors + direct replies).
-   - Fail-open: on any API or parse error, the entire batch is kept.
-   - 1 second pause between batches for rate limiting.
-
-4. **`save_messages_batch(valuable, batch_size=10)`** — Saves messages in batches of 10:
-   - Generates a 1536-dim embedding per message using OpenAI `text-embedding-3-small`.
-   - Upserts into the `messages` table with composite PK `(id, chat_id)`.
-   - On batch failure, falls back to individual upserts.
-   - 1 second pause between batches.
-
-5. **`upsert_chat_state(chat_id, highest_id, initial_scrape_done=True)`** — Persists the highest saved message ID and marks the chat as fully scraped.
+1. `**get_existing_message_ids(chat_id)`** — Queries all message IDs already in the `messages` table for this chat (batched reads of 1000). Returns a `Set[int]` used for dedup.
+2. `**fetch_channel_messages(chat_id, existing_ids, max_id, limit)**` — Iterates through the chat history using `client.iter_messages()`. Skips messages whose ID is in `existing_ids`. Only keeps messages that have non-empty text. Returns a list of message dicts:
+  ```
+    {"id", "chat_id", "author", "text", "link", "reply_to_message_id"}
+  ```
+    The `link` is built as `https://t.me/c/{raw_id}/{msg.id}` where `raw_id` is the chat ID without the `-100` prefix.
+3. `**filter_messages_by_importance(messages, batch_size=20)**` — AI-based filtering using GPT-4o-mini:
+  - Builds reply chains first (`build_reply_chains`) — walks up `reply_to_message_id` recursively (max 5 levels), checks the current batch then falls back to DB lookups.
+    - Sends batches of 20 messages to GPT-4o-mini with a prompt that classifies each message as valuable or not. Reply context (parent chain text) is included so short replies that answer important questions are preserved.
+    - Parses the response (JSON array of kept IDs), then expands the kept set to include full reply chains (ancestors + direct replies).
+    - Fail-open: on any API or parse error, the entire batch is kept.
+    - 1 second pause between batches for rate limiting.
+4. `**save_messages_batch(valuable, batch_size=10)**` — Saves messages in batches of 10:
+  - Generates a 1536-dim embedding per message using OpenAI `text-embedding-3-small`.
+    - Upserts into the `messages` table with composite PK `(id, chat_id)`.
+    - On batch failure, falls back to individual upserts.
+    - 1 second pause between batches.
+5. `**upsert_chat_state(chat_id, highest_id, initial_scrape_done=True)**` — Persists the highest saved message ID and marks the chat as fully scraped.
 
 ---
 
@@ -76,10 +72,10 @@ A Telethon `events.NewMessage` handler fires for every new message in the monito
 
 1. **Text check** — `msg.text and msg.text.strip()` — skips media-only messages.
 2. **Pre-filter** (`src/realtime/pre_filter.py`) — `should_buffer(text)` rejects:
-   - Messages shorter than 3 characters
-   - Single reactions like `да`, `нет`, `ок`, `спс`, emoji
-   - Bare mentions (`@username`)
-   - Just `+`
+  - Messages shorter than 3 characters
+    - Single reactions like `да`, `нет`, `ок`, `спс`, emoji
+    - Bare mentions (`@username`)
+    - Just `+`
 
 Messages that pass are added to the `MessageBuffer`.
 
@@ -87,10 +83,10 @@ Messages that pass are added to the `MessageBuffer`.
 
 `src/realtime/message_buffer.py` — an async-safe in-memory buffer with per-chat message lists.
 
-- **`add(chat_id, message)`** — appends the message to `buffer[chat_id]` under an `asyncio.Lock`. If the buffer for that chat reaches 1000 messages, triggers an immediate flush.
-- **`_flush_chat(chat_id)`** — takes all messages out of the buffer for that chat and runs them through the same pipeline as Phase 1: `get_existing_message_ids` → `filter_messages_by_importance` → `save_messages_batch` → `upsert_chat_state`.
-- **`periodic_flush()`** — background `asyncio` task that flushes all non-empty buffers every 7 days (604800 seconds). Ensures low-traffic chats eventually get processed even if they never hit the 1000-message threshold.
-- **`flush_all()`** — flushes every chat buffer. Called by the periodic timer and by the signal handlers on shutdown.
+- `**add(chat_id, message)`** — appends the message to `buffer[chat_id]` under an `asyncio.Lock`. If the buffer for that chat reaches 1000 messages, triggers an immediate flush.
+- `**_flush_chat(chat_id)**` — takes all messages out of the buffer for that chat and runs them through the same pipeline as Phase 1: `get_existing_message_ids` → `filter_messages_by_importance` → `save_messages_batch` → `upsert_chat_state`.
+- `**periodic_flush()**` — background `asyncio` task that flushes all non-empty buffers every 7 days (604800 seconds). Ensures low-traffic chats eventually get processed even if they never hit the 1000-message threshold.
+- `**flush_all()**` — flushes every chat buffer. Called by the periodic timer and by the signal handlers on shutdown.
 
 ### Graceful shutdown
 
@@ -108,36 +104,40 @@ On hard kill (`kill -9` / power loss), `chat_state` is at most one flush behind 
 
 ### Tables
 
-**`messages`** — composite PK `(id, chat_id)`:
+`**messages**` — composite PK `(id, chat_id)`:
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | BIGINT | Telegram message ID (unique within a chat) |
-| `chat_id` | BIGINT | Absolute Telegram chat ID |
-| `author` | BIGINT | Sender user ID |
-| `text` | TEXT | Message text |
-| `link` | TEXT | `https://t.me/c/{raw_id}/{msg_id}` |
-| `embedding` | vector(1536) | OpenAI text-embedding-3-small |
-| `reply_to_message_id` | BIGINT | Parent message ID (nullable) |
-| `text_search` | tsvector | Auto-populated Russian full-text search column |
 
-**`chat_state`** — PK `chat_id`:
+| Column                | Type         | Notes                                          |
+| --------------------- | ------------ | ---------------------------------------------- |
+| `id`                  | BIGINT       | Telegram message ID (unique within a chat)     |
+| `chat_id`             | BIGINT       | Absolute Telegram chat ID                      |
+| `author`              | BIGINT       | Sender user ID                                 |
+| `text`                | TEXT         | Message text                                   |
+| `link`                | TEXT         | `https://t.me/c/{raw_id}/{msg_id}`             |
+| `embedding`           | vector(1536) | OpenAI text-embedding-3-small                  |
+| `reply_to_message_id` | BIGINT       | Parent message ID (nullable)                   |
+| `text_search`         | tsvector     | Auto-populated Russian full-text search column |
 
-| Column | Type | Notes |
-|---|---|---|
-| `chat_id` | BIGINT | Absolute Telegram chat ID |
-| `last_message_id` | BIGINT | Highest message ID successfully saved |
-| `initial_scrape_done` | BOOLEAN | True after the first full-history scrape completes |
-| `updated_at` | TIMESTAMPTZ | Auto-updated on every write |
 
-**`message_questions`** — generated hypothetical questions per message (populated by a separate backfill script in `scripts/backfill_questions/`).
+`**chat_state**` — PK `chat_id`:
+
+
+| Column                | Type        | Notes                                              |
+| --------------------- | ----------- | -------------------------------------------------- |
+| `chat_id`             | BIGINT      | Absolute Telegram chat ID                          |
+| `last_message_id`     | BIGINT      | Highest message ID successfully saved              |
+| `initial_scrape_done` | BOOLEAN     | True after the first full-history scrape completes |
+| `updated_at`          | TIMESTAMPTZ | Auto-updated on every write                        |
+
+
+`**message_questions**` — generated hypothetical questions per message (populated by a separate backfill script in `scripts/backfill_questions/`).
 
 ---
 
 ## File structure
 
 ```
-vectir-ai-scrapper/
+campora-ai-scrapper/
 ├── main.py                          # Entry point: defines CHAT_IDS, calls run()
 ├── src/
 │   ├── config/
@@ -174,14 +174,16 @@ vectir-ai-scrapper/
 
 All config comes from environment variables (loaded by `python-dotenv` from `.env`):
 
-| Variable | Used by |
-|---|---|
-| `APP_API_ID` | Telethon client (Telegram API) |
-| `APP_API_HASH` | Telethon client (Telegram API) |
-| `TELEGRAM_SESSION` | Telethon StringSession (no file-based session needed in Docker) |
-| `OPENAI_API_KEY` | Embedding generation + AI importance filter |
-| `SUPABASE_URL` | All Supabase queries |
-| `SUPABASE_SERVICE_KEY` | All Supabase queries |
+
+| Variable               | Used by                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `APP_API_ID`           | Telethon client (Telegram API)                                  |
+| `APP_API_HASH`         | Telethon client (Telegram API)                                  |
+| `TELEGRAM_SESSION`     | Telethon StringSession (no file-based session needed in Docker) |
+| `OPENAI_API_KEY`       | Embedding generation + AI importance filter                     |
+| `SUPABASE_URL`         | All Supabase queries                                            |
+| `SUPABASE_SERVICE_KEY` | All Supabase queries                                            |
+
 
 `CHAT_IDS` is hardcoded in `main.py`.
 
@@ -190,20 +192,24 @@ All config comes from environment variables (loaded by `python-dotenv` from `.en
 ## Running
 
 **Local:**
+
 ```
 python main.py
 ```
 
 **Docker:**
+
 ```
-docker build -t vectir-scrapper .
-docker run --env-file .env vectir-scrapper
+docker build -t campora-scrapper .
+docker run --env-file .env campora-scrapper
 ```
 
 **Generating a session string** (one-time, local only):
+
 ```
 python -m scripts.generate_session_string
 ```
+
 Authenticate interactively, then copy the printed string into `TELEGRAM_SESSION`.
 
 ---
@@ -212,9 +218,11 @@ Authenticate interactively, then copy the printed string into `TELEGRAM_SESSION`
 
 Processing messages in batches of 1000 instead of one at a time reduces AI costs by 10-20x:
 
-| Approach | AI calls per 1000 messages | Tokens (approx) |
-|---|---|---|
-| Per-message | 1000 | ~500K |
-| Batched (50 batches of 20) | 50 | ~50K |
+
+| Approach                   | AI calls per 1000 messages | Tokens (approx) |
+| -------------------------- | -------------------------- | --------------- |
+| Per-message                | 1000                       | ~500K           |
+| Batched (50 batches of 20) | 50                         | ~50K            |
+
 
 The AI filter also works better in batches because it sees conversation context (reply chains, conversation flow).
