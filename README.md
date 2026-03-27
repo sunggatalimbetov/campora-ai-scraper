@@ -1,6 +1,6 @@
 # Campora AI Scrapper
 
-Telegram group message scraper with AI-powered importance filtering and vector embeddings. Feeds data into Supabase for the [Campora AI Helper](https://github.com/sunggatalimbetov/vectir-ai-helper) bot.
+Telegram group message scraper with AI-powered importance filtering and vector embeddings. Feeds data into Supabase for the [Campora AI Helper](https://github.com/sunggatalimbetov/campora-ai-helper) bot.
 
 ## Features
 
@@ -101,5 +101,5 @@ supabase db push
 
 ## Related Repos
 
-- [vectir-ai-helper](https://github.com/sunggatalimbetov/vectir-ai-helper) — Telegram bot that searches the scraped data
-- [vectir-ai-dashboard](https://github.com/sunggatalimbetov/vectir-ai-dashboard) — Analytics dashboard
+- [campora-ai-helper](https://github.com/sunggatalimbetov/campora-ai-helper) — Telegram bot that searches the scraped data
+- [campora-ai-dashboard](https://github.com/sunggatalimbetov/campora-ai-dashboard) — Analytics dashboard
