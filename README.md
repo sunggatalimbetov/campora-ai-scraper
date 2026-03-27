@@ -1,4 +1,4 @@
-# Campora AI Scrapper
+# Campora AI Scraper
 
 Telegram group message scraper with AI-powered importance filtering and vector embeddings. Feeds data into Supabase for the [Campora AI Helper](https://github.com/sunggatalimbetov/campora-ai-helper) bot.
 
@@ -60,8 +60,8 @@ python main.py
 ### Docker
 
 ```bash
-docker build -t campora-ai-scrapper .
-docker run --env-file .env campora-ai-scrapper
+docker build -t campora-ai-scraper .
+docker run --env-file .env campora-ai-scraper
 ```
 
 ## Project Structure

@@ -4,11 +4,11 @@
 Read `~/Documents/Obsidian Vault/campora-ai/` for goals, evaluation plan, roadmap, backlog, and architecture docs before making decisions.
 
 ## What is this?
-Telegram message scraper that connects to university group chats as a userbot (Telethon), filters messages for importance using GPT-4o-mini, generates embeddings, and stores everything in Supabase for search. Part of the Campora AI system (3 repos: helper, scrapper, dashboard).
+Telegram message scraper that connects to university group chats as a userbot (Telethon), filters messages for importance using GPT-4o-mini, generates embeddings, and stores everything in Supabase for search. Part of the Campora AI system (3 repos: helper, scraper, dashboard).
 
 ## Architecture
 ```
-[Telegram Groups] → campora-ai-scrapper (this repo) → [Supabase DB]
+[Telegram Groups] → campora-ai-scraper (this repo) → [Supabase DB]
                      Phase 1: batch scrape history
                      Phase 2: real-time listener
 ```

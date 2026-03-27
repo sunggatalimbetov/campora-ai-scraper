@@ -1,5 +1,8 @@
 # Scope Search Results by chat_id
 
+## Priority
+P1 — Pre-launch blocker
+
 ## Problem
 Search RPCs (`match_messages`, `hybrid_search`, `match_messages_and_questions`) return results from ALL groups globally. When a user asks in NU Applicants, they get Messina results mixed in.
 
@@ -19,7 +22,7 @@ Handler (has chat_id) → search_messages(query, chat_id) → hybrid_search(quer
 ## Changes
 
 ### 1. SQL Migration (scraper repo)
-**File:** `supabase/migrations/20260324000000_add_chat_id_filter_to_rpcs.sql`
+**File:** `supabase/migrations/YYYYMMDD_add_chat_id_filter_to_rpcs.sql`
 
 Must `DROP FUNCTION` before recreating (PG can't change signatures with CREATE OR REPLACE).
 
@@ -56,31 +59,6 @@ Must `DROP FUNCTION` before recreating (PG can't change signatures with CREATE O
 
 **`src/handlers/messages.py`** (DM handler)
 - In DMs, `chat_id` is the user's private chat — NOT a group. Pass `chat_id=None` to search all groups.
-
-### 4. Update helper SQL reference files
-- `sql/001_messages_table_and_match.sql`
-- `sql/002_hybrid_search.sql`
-- `sql/003_question_generation.sql`
-
-## Files Modified
-
-### Scrapper repo (campora-ai-scraper)
-- `supabase/migrations/20260324000000_add_chat_id_filter_to_rpcs.sql` (new)
-
-### Helper repo (campora-ai-helper)
-- `sql/001_messages_table_and_match.sql`
-- `sql/002_hybrid_search.sql`
-- `sql/003_question_generation.sql`
-- `src/services/message_search/search_messages.py`
-- `src/services/message_search/search_messages_hybrid.py`
-- `src/services/message_search/search_messages_semantic_only.py`
-- `src/services/message_search/search_messages_by_questions.py`
-- `src/handlers/commands.py`
-
-## Files NOT Modified
-- `src/handlers/messages.py` — DMs already pass no chat context
-- RRF scoring logic, embedding model, conversation history — unchanged
-- `src/services/message_search/generate_answer.py` — no changes
 
 ## Verification
 1. Push migration: `supabase db push`
