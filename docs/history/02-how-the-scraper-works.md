@@ -1,10 +1,10 @@
-# 02 – How the scrapper works
+# 02 – How the scraper works
 
 **Date:** 2026-02-20
 
 ## Summary
 
-The scrapper is a long-running Python process that connects to Telegram via Telethon, scrapes university group chat history, filters messages with AI, generates embeddings, and stores everything in Supabase. It operates in two phases: an initial one-shot batch scrape for new groups, then a continuous real-time event listener that buffers incoming messages and flushes them through the same pipeline.
+The scraper is a long-running Python process that connects to Telegram via Telethon, scrapes university group chat history, filters messages with AI, generates embeddings, and stores everything in Supabase. It operates in two phases: an initial one-shot batch scrape for new groups, then a continuous real-time event listener that buffers incoming messages and flushes them through the same pipeline.
 
 ---
 
@@ -137,7 +137,7 @@ On hard kill (`kill -9` / power loss), `chat_state` is at most one flush behind 
 ## File structure
 
 ```
-campora-ai-scrapper/
+campora-ai-scraper/
 ├── main.py                          # Entry point: defines CHAT_IDS, calls run()
 ├── src/
 │   ├── config/
@@ -200,8 +200,8 @@ python main.py
 **Docker:**
 
 ```
-docker build -t campora-scrapper .
-docker run --env-file .env campora-scrapper
+docker build -t campora-scraper .
+docker run --env-file .env campora-scraper
 ```
 
 **Generating a session string** (one-time, local only):
