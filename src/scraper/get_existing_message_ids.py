@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Set
 
 from src.config.settings import SUPABASE_SERVICE_KEY, SUPABASE_URL
 from supabase import Client, create_client
@@ -12,7 +12,7 @@ def get_existing_message_ids(chat_id: int) -> Set[int]:
     print(f"📋 Fetching existing message for IDs for chat {abs_chat_id}...")
 
     # Fetch in batches to handle large datasets
-    all_ids = set[Any]()
+    all_ids: Set[int] = set()
     offset = 0
     batch_size = 1000
 

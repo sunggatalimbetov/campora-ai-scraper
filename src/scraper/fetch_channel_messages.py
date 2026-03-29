@@ -4,6 +4,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 
 from src.config.settings import APP_API_HASH, APP_API_ID, TELEGRAM_SESSION
+from src.scraper.telegram_links import build_message_link
 
 _client = None
 
@@ -42,12 +43,6 @@ async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: O
     if max_id:
         print(f"📍 Resuming from message ID: {max_id}")
 
-    # For supergroups, build a c/ link using the ID without the -100 prefix
-    raw_id = str(abs(chat_id))
-    if raw_id.startswith("100"):
-        raw_id = raw_id[3:]  # strip the "100" prefix for t.me/c/ links
-    link_base = f"https://t.me/c/{raw_id}"
-
     try:
         async for msg in get_client().iter_messages(chat_id, **kwargs):
             total_count += 1
@@ -67,7 +62,7 @@ async def fetch_channel_messages(chat_id: int, existing_ids: Set[int], max_id: O
                         "chat_id": abs(chat_id),
                         "author": msg.sender_id,
                         "text": msg.text,
-                        "link": f"{link_base}/{msg.id}",
+                        "link": build_message_link(chat_id, msg.id),
                         "reply_to_message_id": msg.reply_to_msg_id,
                         "created_at": msg.date.isoformat() if msg.date else None,
                     }
