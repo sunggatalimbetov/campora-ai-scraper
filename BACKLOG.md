@@ -37,20 +37,24 @@ This file is the working priority list for the scraper repo. Detailed design not
 - Sync Supabase lookups in `build_reply_chains._lookup_message()` block reply-chain resolution.
 - `MessageBuffer` currently holds its lock while doing DB and OpenAI work, which can stall ingestion for all chats.
 
+#### 6. Complete Telegram env var validation
+- `APP_API_ID`, `APP_API_HASH`, and `TELEGRAM_SESSION` still fall back to `0` or empty strings.
+- Make startup validation fail fast for the required Telegram client settings too.
+
 ### P3 — Maintainability
 
-#### 6. Replace `print()` calls with structured logging
+#### 7. Replace `print()` calls with structured logging
 - Move scraper and realtime pipeline output to `logging`.
 - Keep log messages operationally useful: chat id, batch size, retry count, flush timing, and failure context.
 - Suggested implementation doc: `docs/features/10-replace-print-with-logging.md`
 
-#### 7. Extract magic numbers into config/constants
+#### 8. Extract magic numbers into config/constants
 - Centralize batch sizes, flush thresholds, flush intervals, retry delays, and reply-chain depth.
 - Suggested implementation doc: `docs/features/16-extract-magic-numbers.md`
 
 ### P4 — Quality
 
-#### 8. Add test coverage
+#### 9. Add test coverage
 - Start with unit tests for pure logic:
   - `src/realtime/pre_filter.py`
   - `_parse_valuable_ids()` and `_expand_reply_chains()`
