@@ -43,6 +43,12 @@ async def initial_scrape(chat_id: int, batch_size: int = 10):
     if excluded_count:
         print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {abs(chat_id)}")
 
+    if not eligible_messages:
+        highest_id = max(msg["id"] for msg in new_messages)
+        upsert_chat_state(abs(chat_id), highest_id, initial_scrape_done=True)
+        print(f"✅ No eligible messages after opt-out filter for chat {abs(chat_id)}, last_message_id={highest_id}")
+        return
+
     valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
     after_count = len(valuable)
     print(f"🤖 AI filter: {len(eligible_messages)} -> {after_count} valuable ({len(eligible_messages) - after_count} filtered out)")
