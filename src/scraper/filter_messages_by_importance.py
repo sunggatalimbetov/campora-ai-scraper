@@ -8,7 +8,7 @@ from openai import OpenAI
 from src.scraper.build_reply_chains import build_reply_chains
 from src.config.settings import OPENAI_API_KEY
 
-FILTER_PROMPT = """Analyze these Telegram messages from a university student group and identify which ones contain valuable information for students.
+FILTER_PROMPT = """Analyze these Telegram messages from a student, academic, or community group and identify which ones contain durable, useful information worth indexing for later search.
 
 The group may focus on any topic — applicants, enrolled students, alumni, etc. Adapt your judgment to the group's actual content.
 
@@ -18,12 +18,12 @@ Consider the FULL conversation thread when judging value — a short reply like 
 KEEP these messages (valuable):
 - Announcements, deadlines, important dates
 - Questions and answers about academic topics
-- Admissions info: entry requirements, exam scores, application deadlines (e.g. NUET, ENT, SAT)
-- Questions and answers about preparatory and admission programs (e.g. Foundation, Direct admission, Erasmus)
+- Admissions info: entry requirements, exam scores, application deadlines, entrance exams, and application steps
+- Questions and answers about university programs, admissions pathways, exchange opportunities, and semester logistics
 - Shared resources, links, study materials, exams
 - Official information from professors/admins
 - Questions and answers about documents (e.g. visa, residence permit, student ID)
-- Questions and answers about exchange and transfer programs (e.g. Erasmus, semester abroad)
+- Questions and answers about exchange and transfer programs
 - Course registration and enrollment help
 - Campus facilities and services info
 - Scholarship and financial aid information
@@ -39,7 +39,7 @@ FILTER OUT these messages (not valuable):
 - Single-word responses or reactions (unless answering a valuable question)
 - Selling/buying items or marketplace posts
 - Food delivery and restaurant recommendations
-- Social event planning unrelated to academics
+- Social event planning unrelated to the group's core purpose
 - Transportation/ride sharing requests
 - Personal complaints or venting
 - Gaming or entertainment discussions

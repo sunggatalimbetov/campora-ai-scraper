@@ -4,6 +4,7 @@ from typing import List
 from telethon import events
 
 from src.scraper import get_client
+from src.scraper.telegram_links import build_message_link
 from src.realtime.initial_scrape import initial_scrape
 from src.realtime.message_buffer import MessageBuffer
 from src.realtime.pre_filter import should_buffer
@@ -44,10 +45,6 @@ async def run(chat_ids: List[int], flush_threshold: int = 1000, flush_interval: 
         if not should_buffer(msg.text):
             return
 
-        raw_id = str(abs(event.chat_id))
-        if raw_id.startswith("100"):
-            raw_id = raw_id[3:]
-
         await buffer.add(
             chat_id=abs(event.chat_id),
             message={
@@ -55,7 +52,7 @@ async def run(chat_ids: List[int], flush_threshold: int = 1000, flush_interval: 
                 "chat_id": abs(event.chat_id),
                 "author": msg.sender_id,
                 "text": msg.text,
-                "link": f"https://t.me/c/{raw_id}/{msg.id}",
+                "link": build_message_link(event.chat_id, msg.id),
                 "reply_to_message_id": msg.reply_to_msg_id,
                 "created_at": msg.date.isoformat() if msg.date else None,
             },

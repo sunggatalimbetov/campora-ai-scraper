@@ -41,12 +41,13 @@ async def initial_scrape(chat_id: int, batch_size: int = 10):
     print(f"🤖 AI filter: {before_count} -> {after_count} valuable ({before_count - after_count} filtered out)")
 
     if not valuable:
-        upsert_chat_state(abs(chat_id), resume_from or 0, initial_scrape_done=True)
-        print(f"✅ No valuable messages for chat {abs(chat_id)}, marked as done")
+        highest_id = max(msg["id"] for msg in new_messages)
+        upsert_chat_state(abs(chat_id), highest_id, initial_scrape_done=True)
+        print(f"✅ No valuable messages for chat {abs(chat_id)}, last_message_id={highest_id}")
         return
 
     save_messages_batch(valuable, batch_size=batch_size)
 
-    highest_id = max(msg["id"] for msg in valuable)
+    highest_id = max(msg["id"] for msg in new_messages)
     upsert_chat_state(abs(chat_id), highest_id, initial_scrape_done=True)
     print(f"✅ Initial scrape done for chat {abs(chat_id)}, last_message_id={highest_id}")

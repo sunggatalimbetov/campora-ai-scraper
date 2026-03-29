@@ -1,14 +1,9 @@
 import time
 from typing import List
 
-from dotenv import load_dotenv
-
 from src.scraper import get_embedding
 from src.config.settings import SUPABASE_SERVICE_KEY, SUPABASE_URL
 from supabase import Client, create_client
-
-# Load environment variables
-load_dotenv()
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
