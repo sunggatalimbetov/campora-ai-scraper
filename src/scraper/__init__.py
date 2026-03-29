@@ -11,5 +11,6 @@ from src.scraper.get_embedding import get_embedding  # noqa: F401
 from src.scraper.get_existing_message_ids import (  # noqa: F401
     get_existing_message_ids,
 )
+from src.scraper.opted_out_users import get_opted_out_user_ids  # noqa: F401
 from src.scraper.save_messages_batch import save_messages_batch  # noqa: F401
 from src.scraper.scrape_channel import scrape_channel  # noqa: F401

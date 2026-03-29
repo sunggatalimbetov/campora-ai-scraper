@@ -2,6 +2,7 @@ from src.scraper import (
     fetch_channel_messages,
     filter_messages_by_importance,
     get_existing_message_ids,
+    get_opted_out_user_ids,
     save_messages_batch,
 )
 from src.scraper.chat_state import get_chat_state, upsert_chat_state
@@ -36,9 +37,15 @@ async def initial_scrape(chat_id: int, batch_size: int = 10):
         return
 
     before_count = len(new_messages)
-    valuable = filter_messages_by_importance(new_messages, batch_size=20)
+    opted_out_user_ids = get_opted_out_user_ids(chat_id)
+    eligible_messages = [msg for msg in new_messages if msg.get("author") not in opted_out_user_ids]
+    excluded_count = before_count - len(eligible_messages)
+    if excluded_count:
+        print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {abs(chat_id)}")
+
+    valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
     after_count = len(valuable)
-    print(f"🤖 AI filter: {before_count} -> {after_count} valuable ({before_count - after_count} filtered out)")
+    print(f"🤖 AI filter: {len(eligible_messages)} -> {after_count} valuable ({len(eligible_messages) - after_count} filtered out)")
 
     if not valuable:
         highest_id = max(msg["id"] for msg in new_messages)
