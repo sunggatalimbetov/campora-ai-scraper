@@ -54,17 +54,17 @@ class MessageBuffer:
             return
 
         opted_out_user_ids = get_opted_out_user_ids(chat_id)
-        eligible_messages = [m for m in new_messages if m.get("author") not in opted_out_user_ids]
-        excluded_count = len(new_messages) - len(eligible_messages)
+        excluded_count = sum(1 for message in new_messages if message.get("author") in opted_out_user_ids)
 
         if excluded_count:
-            print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {chat_id}")
+            print(f"🙈 Opt-out filter: {excluded_count} messages will be excluded from indexing for chat {chat_id}")
 
-        if not eligible_messages:
+        if excluded_count == len(new_messages):
             print(f"✅ No eligible messages after opt-out filter for chat {chat_id}")
             return
 
-        valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
+        valuable_with_context = filter_messages_by_importance(new_messages, batch_size=20)
+        valuable = [message for message in valuable_with_context if message.get("author") not in opted_out_user_ids]
 
         if not valuable:
             print(f"✅ No valuable messages after AI filter for chat {chat_id}")
