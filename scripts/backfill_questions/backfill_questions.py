@@ -147,14 +147,18 @@ def backfill(
         elif all_questions:
             # 5. Skip messages that already have questions (dedup on re-run)
             chunk_msg_ids = list(set(q[0] for q in all_questions))
-            existing_resp = (
-                supabase.table("message_questions")
-                .select("message_id")
-                .eq("chat_id", chat_id)
-                .in_("message_id", chunk_msg_ids)
-                .execute()
-            )
-            already_covered = set(r["message_id"] for r in existing_resp.data)
+            already_covered: set[int] = set()
+            dedup_batch_size = 500
+            for i in range(0, len(chunk_msg_ids), dedup_batch_size):
+                batch_ids = chunk_msg_ids[i : i + dedup_batch_size]
+                existing_resp = (
+                    supabase.table("message_questions")
+                    .select("message_id")
+                    .eq("chat_id", chat_id)
+                    .in_("message_id", batch_ids)
+                    .execute()
+                )
+                already_covered.update(r["message_id"] for r in existing_resp.data)
             if already_covered:
                 before = len(all_questions)
                 all_questions = [q for q in all_questions if q[0] not in already_covered]
