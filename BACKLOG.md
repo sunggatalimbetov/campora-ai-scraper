@@ -29,8 +29,12 @@ This file is the working priority list for the scraper repo. Detailed design not
 - Add reconnect loop or at least explicit alerting and controlled restart behavior.
 
 #### 4. Share a single Supabase client
-- `chat_state.py`, `build_reply_chains.py`, `get_existing_message_ids.py`, and `save_messages_batch.py` each create a client at import time.
+- `chat_state.py`, `build_reply_chains.py`, `get_existing_message_ids.py`, `save_messages_batch.py`, and `opted_out_users.py` each create a client at import time.
 - Replace this with one shared client module.
+
+#### 4a. Add opt-back-in path for opted-out users
+- Currently opting back in requires a manual `DELETE` from `opted_out_users`.
+- Add a helper or endpoint so users can reverse their opt-out.
 
 #### 5. Remove event-loop blocking from the ingestion path
 - `time.sleep(1)` in `filter_messages_by_importance.py` blocks the async runtime.
