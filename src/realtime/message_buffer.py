@@ -4,8 +4,8 @@ from typing import List
 
 from src.scraper import (
     filter_messages_by_importance,
+    filter_opted_out,
     get_existing_message_ids,
-    get_opted_out_user_ids,
     save_messages_batch,
 )
 from src.scraper.chat_state import upsert_chat_state
@@ -53,18 +53,16 @@ class MessageBuffer:
             print(f"✅ All {len(messages)} messages already in DB for chat {chat_id}")
             return
 
-        opted_out_user_ids = get_opted_out_user_ids(chat_id)
-        excluded_count = sum(1 for message in new_messages if message.get("author") in opted_out_user_ids)
+        eligible_messages, excluded_count = filter_opted_out(new_messages, chat_id)
 
         if excluded_count:
-            print(f"🙈 Opt-out filter: {excluded_count} messages will be excluded from indexing for chat {chat_id}")
+            print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {chat_id}")
 
-        if excluded_count == len(new_messages):
+        if not eligible_messages:
             print(f"✅ No eligible messages after opt-out filter for chat {chat_id}")
             return
 
-        valuable_with_context = filter_messages_by_importance(new_messages, batch_size=20)
-        valuable = [message for message in valuable_with_context if message.get("author") not in opted_out_user_ids]
+        valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
 
         if not valuable:
             print(f"✅ No valuable messages after AI filter for chat {chat_id}")

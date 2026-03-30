@@ -1,8 +1,8 @@
 from src.scraper import (
     fetch_channel_messages,
     filter_messages_by_importance,
+    filter_opted_out,
     get_existing_message_ids,
-    get_opted_out_user_ids,
     save_messages_batch,
 )
 from src.scraper.chat_state import get_chat_state, upsert_chat_state
@@ -36,21 +36,23 @@ async def initial_scrape(chat_id: int, batch_size: int = 10):
         print(f"✅ No new messages for chat {abs(chat_id)}, marked as done")
         return
 
-    opted_out_user_ids = get_opted_out_user_ids(chat_id)
-    excluded_count = sum(1 for msg in new_messages if msg.get("author") in opted_out_user_ids)
+    eligible_messages, excluded_count = filter_opted_out(new_messages, chat_id)
     if excluded_count:
-        print(f"🙈 Opt-out filter: {excluded_count} messages will be excluded from indexing for chat {abs(chat_id)}")
+        print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {abs(chat_id)}")
 
-    if excluded_count == len(new_messages):
+    if not eligible_messages:
         highest_id = max(msg["id"] for msg in new_messages)
         upsert_chat_state(abs(chat_id), highest_id, initial_scrape_done=True)
         print(f"✅ No eligible messages after opt-out filter for chat {abs(chat_id)}, last_message_id={highest_id}")
         return
 
-    valuable_with_context = filter_messages_by_importance(new_messages, batch_size=20)
-    valuable = [msg for msg in valuable_with_context if msg.get("author") not in opted_out_user_ids]
+    # NOTE: reply chains built inside filter_messages_by_importance may reference
+    # messages from opted-out users if a non-opted-out message replies to one.
+    # Fully stripping that context requires changes to build_reply_chains.
+    before_count = len(eligible_messages)
+    valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
     after_count = len(valuable)
-    print(f"🤖 AI filter: {len(new_messages)} -> {after_count} valuable messages to index ({len(new_messages) - after_count} filtered out)")
+    print(f"🤖 AI filter: {before_count} -> {after_count} valuable ({before_count - after_count} filtered out)")
 
     if not valuable:
         highest_id = max(msg["id"] for msg in new_messages)

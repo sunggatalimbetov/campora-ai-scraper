@@ -1,11 +1,14 @@
 import time
-from typing import Set, Tuple
+from typing import List, Set, Tuple
 
 from src.config.settings import SUPABASE_SERVICE_KEY, SUPABASE_URL
 from supabase import Client, create_client
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+# Keyed by abs(chat_id) -> (user_ids, monotonic timestamp).
+# Grows with the number of distinct chats — bounded in practice by the
+# small number of monitored groups.
 _cache: dict[int, Tuple[Set[int], float]] = {}
 _CACHE_TTL_SECONDS = 300
 
@@ -27,6 +30,16 @@ def get_opted_out_user_ids(chat_id: int) -> Set[int]:
     user_ids = {row["user_id"] for row in result.data or []}
     _cache[abs_chat_id] = (user_ids, now)
     return user_ids
+
+
+def filter_opted_out(messages: List[dict], chat_id: int) -> Tuple[List[dict], int]:
+    """Remove messages from opted-out users.
+
+    Returns (eligible_messages, excluded_count).
+    """
+    opted_out = get_opted_out_user_ids(chat_id)
+    eligible = [m for m in messages if m.get("author") not in opted_out]
+    return eligible, len(messages) - len(eligible)
 
 
 def invalidate_cache(chat_id: int | None = None):
