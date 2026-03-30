@@ -1,6 +1,7 @@
 from src.scraper import (
     fetch_channel_messages,
     filter_messages_by_importance,
+    filter_opted_out,
     get_existing_message_ids,
     save_messages_batch,
 )
@@ -35,8 +36,21 @@ async def initial_scrape(chat_id: int, batch_size: int = 10):
         print(f"✅ No new messages for chat {abs(chat_id)}, marked as done")
         return
 
-    before_count = len(new_messages)
-    valuable = filter_messages_by_importance(new_messages, batch_size=20)
+    eligible_messages, excluded_count = filter_opted_out(new_messages, chat_id)
+    if excluded_count:
+        print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {abs(chat_id)}")
+
+    if not eligible_messages:
+        highest_id = max(msg["id"] for msg in new_messages)
+        upsert_chat_state(abs(chat_id), highest_id, initial_scrape_done=True)
+        print(f"✅ No eligible messages after opt-out filter for chat {abs(chat_id)}, last_message_id={highest_id}")
+        return
+
+    # NOTE: reply chains built inside filter_messages_by_importance may reference
+    # messages from opted-out users if a non-opted-out message replies to one.
+    # Fully stripping that context requires changes to build_reply_chains.
+    before_count = len(eligible_messages)
+    valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
     after_count = len(valuable)
     print(f"🤖 AI filter: {before_count} -> {after_count} valuable ({before_count - after_count} filtered out)")
 

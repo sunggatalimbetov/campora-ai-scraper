@@ -4,6 +4,7 @@ from typing import List
 
 from src.scraper import (
     filter_messages_by_importance,
+    filter_opted_out,
     get_existing_message_ids,
     save_messages_batch,
 )
@@ -52,7 +53,16 @@ class MessageBuffer:
             print(f"✅ All {len(messages)} messages already in DB for chat {chat_id}")
             return
 
-        valuable = filter_messages_by_importance(new_messages, batch_size=20)
+        eligible_messages, excluded_count = filter_opted_out(new_messages, chat_id)
+
+        if excluded_count:
+            print(f"🙈 Opt-out filter: excluded {excluded_count} messages for chat {chat_id}")
+
+        if not eligible_messages:
+            print(f"✅ No eligible messages after opt-out filter for chat {chat_id}")
+            return
+
+        valuable = filter_messages_by_importance(eligible_messages, batch_size=20)
 
         if not valuable:
             print(f"✅ No valuable messages after AI filter for chat {chat_id}")
