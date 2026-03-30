@@ -1,6 +1,7 @@
 """Checkpoint save/load for resumable backfill progress."""
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -46,4 +47,6 @@ def save_checkpoint(
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    CHECKPOINT_PATH.write_text(json.dumps(data, indent=2))
+    tmp = CHECKPOINT_PATH.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, indent=2))
+    os.replace(tmp, CHECKPOINT_PATH)

@@ -119,13 +119,10 @@ def backfill(
             print(f"  🔄 Groq batch {batch_num}/{total_batches}: "
                   f"{len(result)}/{len(batch)} messages → {batch_q_count} questions")
 
+            id_to_chat = {m["id"]: m["chat_id"] for m in batch}
             for msg_id, questions in result.items():
-                msg_chat_id = next(
-                    (m["chat_id"] for m in batch if m["id"] == msg_id),
-                    chat_id,
-                )
                 for q_text in questions:
-                    all_questions.append((msg_id, msg_chat_id, q_text))
+                    all_questions.append((msg_id, id_to_chat.get(msg_id, chat_id), q_text))
 
         # Count messages that actually got questions
         msgs_with_questions = len(set(mq[0] for mq in all_questions))
@@ -148,28 +145,47 @@ def backfill(
                     print(f"    → {q}")
                 print()
         elif all_questions:
-            # 5. Batch embed all question texts
-            question_texts = [q[2] for q in all_questions]
-            print(f"  📦 Embedding {len(question_texts)} questions...")
-            embeddings = get_embeddings_batch(question_texts)
+            # 5. Skip messages that already have questions (dedup on re-run)
+            chunk_msg_ids = list(set(q[0] for q in all_questions))
+            existing_resp = (
+                supabase.table("message_questions")
+                .select("message_id")
+                .eq("chat_id", chat_id)
+                .in_("message_id", chunk_msg_ids)
+                .execute()
+            )
+            already_covered = set(r["message_id"] for r in existing_resp.data)
+            if already_covered:
+                before = len(all_questions)
+                all_questions = [q for q in all_questions if q[0] not in already_covered]
+                print(f"  ⏭️ Skipped {before - len(all_questions)} questions "
+                      f"({len(already_covered)} messages already in DB)")
 
-            # 6. Batch insert into message_questions
-            rows = [
-                {
-                    "message_id": all_questions[j][0],
-                    "chat_id": all_questions[j][1],
-                    "question_text": all_questions[j][2],
-                    "embedding": embeddings[j],
-                }
-                for j in range(len(all_questions))
-            ]
+            if not all_questions:
+                print(f"  ⏭️ All messages in this chunk already have questions")
+            else:
+                # 6. Batch embed all question texts
+                question_texts = [q[2] for q in all_questions]
+                print(f"  📦 Embedding {len(question_texts)} questions...")
+                embeddings = get_embeddings_batch(question_texts)
 
-            insert_batch_size = 500
-            for i in range(0, len(rows), insert_batch_size):
-                batch = rows[i : i + insert_batch_size]
-                supabase.table("message_questions").insert(batch).execute()
+                # 7. Batch insert into message_questions
+                rows = [
+                    {
+                        "message_id": all_questions[j][0],
+                        "chat_id": all_questions[j][1],
+                        "question_text": all_questions[j][2],
+                        "embedding": embeddings[j],
+                    }
+                    for j in range(len(all_questions))
+                ]
 
-            print(f"  💾 Inserted {len(rows)} questions to DB")
+                insert_batch_size = 500
+                for i in range(0, len(rows), insert_batch_size):
+                    batch = rows[i : i + insert_batch_size]
+                    supabase.table("message_questions").insert(batch).execute()
+
+                print(f"  💾 Inserted {len(rows)} questions to DB")
 
         # 7. Update counters and checkpoint
         total_processed += chunk_processed
