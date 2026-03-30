@@ -124,6 +124,18 @@ def backfill(
                 for q_text in questions:
                     all_questions.append((msg_id, id_to_chat.get(msg_id, chat_id), q_text))
 
+        # Deduplicate within chunk (safety net)
+        seen_questions: set[tuple[int, str]] = set()
+        deduped: list[tuple[int, int, str]] = []
+        for msg_id, msg_chat_id, q_text in all_questions:
+            key = (msg_id, q_text)
+            if key not in seen_questions:
+                seen_questions.add(key)
+                deduped.append((msg_id, msg_chat_id, q_text))
+        if len(deduped) < len(all_questions):
+            print(f"  🔁 Removed {len(all_questions) - len(deduped)} duplicate questions within chunk")
+        all_questions = deduped
+
         # Count messages that actually got questions
         msgs_with_questions = len(set(mq[0] for mq in all_questions))
         msgs_skipped_by_llm = len(enriched) - msgs_with_questions
