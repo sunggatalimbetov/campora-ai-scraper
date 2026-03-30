@@ -18,6 +18,9 @@ OPENAI_API_KEY: str = _require_env("OPENAI_API_KEY")
 SUPABASE_URL: str = _require_env("SUPABASE_URL")
 SUPABASE_SERVICE_KEY: str = _require_env("SUPABASE_SERVICE_KEY")
 
+# Groq Configuration (for batch question generation)
+GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
 # Telegram App Configuration (Telethon / MTProto)
 APP_API_ID: int = int(os.getenv("APP_API_ID", "0"))
 APP_API_HASH: str = os.getenv("APP_API_HASH", "")

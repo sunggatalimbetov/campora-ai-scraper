@@ -2,3 +2,7 @@
 *.session
 __pycache__/
 *.pyc
+.venv/
+backfill_progress.json
+memory/
+AGENTS.md
