@@ -9,6 +9,7 @@ description = "Telegram message scraper and data pipeline for Campora AI"
 dependencies = [
     "python-dotenv",
     "openai",
+    "groq",
     "supabase",
     "telethon",
 ]
