@@ -76,44 +76,11 @@ class GroqQuestionGenerator:
         messages: list[dict],
         max_retries: int = 3,
     ) -> dict[int, list[str]]:
-        """Generate questions for a batch of messages with fallback retry.
+        """Generate questions for a batch of messages.
 
-        On parse failure, retries the failed messages in smaller sub-batches.
+        Retries on API errors (network, rate limit) but not on parse failures —
+        the JSON parser already handles truncation, comments, and trailing text.
         """
-        if not messages:
-            return {}
-
-        result = self._call_groq(messages, max_retries)
-
-        # Find which messages got no questions back
-        covered_ids = set(result.keys())
-        missed = [m for m in messages if m["id"] not in covered_ids]
-
-        if not missed:
-            return result
-
-        # Retry missed messages in sub-batches of 5
-        for i in range(0, len(missed), 5):
-            sub_batch = missed[i : i + 5]
-            sub_result = self._call_groq(sub_batch, max_retries)
-            if sub_result:
-                result.update(sub_result)
-                continue
-
-            # Final fallback: try each message individually
-            for msg in sub_batch:
-                if msg["id"] not in result:
-                    single_result = self._call_groq([msg], max_retries)
-                    result.update(single_result)
-
-        return result
-
-    def _call_groq(
-        self,
-        messages: list[dict],
-        max_retries: int = 3,
-    ) -> dict[int, list[str]]:
-        """Make a single Groq API call for a batch of messages."""
         if not messages:
             return {}
 
