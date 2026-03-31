@@ -116,8 +116,11 @@ def backfill(
             result = generator.generate_questions_batch(batch)
 
             batch_q_count = sum(len(qs) for qs in result.values())
+            coverage = len(result) / len(batch) if batch else 0
             print(f"  🔄 Groq batch {batch_num}/{total_batches}: "
                   f"{len(result)}/{len(batch)} messages → {batch_q_count} questions")
+            if coverage < 0.5:
+                print(f"  ⚠️ Low coverage ({coverage:.0%}) — possible truncation or parse failure")
 
             id_to_chat = {m["id"]: m["chat_id"] for m in batch}
             for msg_id, questions in result.items():
